@@ -1,14 +1,9 @@
-/* =========================================================
-   MINI PROJECT - FULL WORKING SQL (Schema + Data + Queries)
-   ========================================================= */
 
 DROP DATABASE IF EXISTS mini_project;
 CREATE DATABASE mini_project;
 USE mini_project;
 
-/* ======================
-   1) TABLES (Schema)
-   ====================== */
+
 
 /* Vendor table */
 CREATE TABLE vendor (
@@ -43,7 +38,7 @@ CREATE TABLE working_hours (
   hours INT NOT NULL
 );
 
-/* Working information table (used by employee_order_log trigger) */
+/* Working information table */
 CREATE TABLE working_information (
   info_id INT PRIMARY KEY AUTO_INCREMENT,
   employee_id INT NOT NULL,
@@ -52,7 +47,7 @@ CREATE TABLE working_information (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-/* Inventory log for low_inventory_trigger */
+
 CREATE TABLE inventory_log (
   log_id INT PRIMARY KEY AUTO_INCREMENT,
   item_name VARCHAR(100) NOT NULL,
@@ -60,7 +55,7 @@ CREATE TABLE inventory_log (
   log_date DATETIME NOT NULL
 );
 
-/* Employee log for employee_order_log trigger */
+
 CREATE TABLE employee_log (
   log_id INT PRIMARY KEY AUTO_INCREMENT,
   employee_id INT NOT NULL,
@@ -70,9 +65,7 @@ CREATE TABLE employee_log (
 );
 
 
-/* ======================
-   2) TRIGGERS
-   ====================== */
+/*  TRIGGERS*/
 
 DROP TRIGGER IF EXISTS low_inventory_trigger;
 DROP TRIGGER IF EXISTS reward_regular_customers;
@@ -95,7 +88,7 @@ BEGIN
   END IF;
 END$$
 
-/* Trigger 2: reward regular customers before insert */
+/* reward regular customers before insert */
 CREATE TRIGGER reward_regular_customers
 BEFORE INSERT ON regular_customers
 FOR EACH ROW
@@ -107,7 +100,7 @@ BEGIN
   END IF;
 END$$
 
-/* Trigger 3: log employee overtime after insert */
+/* log employee overtime after insert */
 CREATE TRIGGER employee_order_log
 AFTER INSERT ON working_information
 FOR EACH ROW
@@ -130,9 +123,7 @@ END$$
 DELIMITER ;
 
 
-/* ======================
-   3) SAMPLE DATA
-   ====================== */
+/* SAMPLE DATA */
 
 INSERT INTO vendor (vendor_id, fname, vendor_company) VALUES
 (98, 'Justin',  'Mancini'),
@@ -160,36 +151,33 @@ INSERT INTO working_hours (id, name, hours) VALUES
 (5, 'E5', 10);
 
 
-/* ======================
-   4) QUERIES (5a / 5b / 5c / 5d)
-   ====================== */
+/*  QUERIES  */
 
-/*5a (i)*/
+
 SELECT cases_order FROM items;
 
-/*5a (ii)*/
+
 SELECT name FROM items
 ORDER BY name;
 
-/*5a (iii)*/
+
 SELECT DISTINCT(type) FROM items;
 
-/*5a (iv)*/
 SELECT name FROM items i
 WHERE i.vendor_company = 'Mancini' AND i.cases_order > 2;
 
 SELECT vendor_id FROM vendor v
 WHERE v.fname = 'Justin' OR v.vendor_id = 98;
 
-/*5a (v)*/
+
 SELECT name FROM items
 WHERE type IN ('Vodka', 'Whiskey');
 
-/*5a (vi)*/
+
 SELECT * FROM items
 WHERE vendor_company LIKE 'M%';
 
-/*5b (i)*/
+
 SELECT SUM(cases_order) AS cases_order_one_month
 FROM items;
 
@@ -199,7 +187,7 @@ FROM items;
 SELECT COUNT(*) AS number_of_vendors
 FROM vendor;
 
-/*5c (i) self join*/
+/* self join */
 SELECT
   e1.name AS Employee1_Name, e1.id AS Employee1_ID,
   e2.name AS Employee2_Name, e2.id AS Employee2_ID
@@ -208,7 +196,7 @@ JOIN working_hours e2
   ON e1.hours = e2.hours
 WHERE e1.id <> e2.id;
 
-/*5c (ii) inner join*/
+/* inner join */
 SELECT
   rc.fname AS FNAME,
   rc.lname AS LNAME,
@@ -220,7 +208,7 @@ JOIN items i
 JOIN vendor v
   ON i.vendor_company = v.vendor_company;
 
-/*5c (iii) left outer join*/
+/* left outer join */
 SELECT
   i.name,
   v.vendor_company
@@ -228,16 +216,14 @@ FROM items i
 LEFT OUTER JOIN vendor v
   ON i.vendor_company = v.vendor_company;
 
-/*5d (i) group by having*/
+/* group by having */
 SELECT name, SUM(cases_order) AS cases_order
 FROM items
 GROUP BY name
 HAVING SUM(cases_order) > 3;
 
 
-/* ======================
-   5) VIEWS (5e)
-   ====================== */
+/*  VIEWS  */
 
 DROP VIEW IF EXISTS Rum;
 CREATE VIEW Rum AS
@@ -259,11 +245,9 @@ JOIN items i
 WHERE r.number > 10;
 
 
-/* ======================
-   6) QUICK TESTS for Triggers (CORRECT)
-   ====================== */
+/*  QUICK TESTS */
 
-/* Test low_inventory_trigger (SAFE UPDATE + NO 1093 ERROR) */
+/* Test low_inventory_trigger  */
 UPDATE items i
 JOIN (
     SELECT item_id
